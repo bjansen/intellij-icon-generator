@@ -1,0 +1,309 @@
+<!doctype html>
+<html lang="fr">
+<head>
+    <meta charset="utf-8">
+    <title>IntelliJ Icon Generator</title>
+    <style>
+        body {
+            text-align: center;
+        }
+
+        h1, h2, legend {
+            font-family: Menlo, Consolas, Monaco, Lucida Console, Liberation Mono, DejaVu Sans Mono, Bitstream Vera Sans Mono, Courier New, monospace, serif;
+        }
+
+        .container {
+            display: inline-block;
+        }
+
+        #preview {
+            border: 1px dotted #3e515b;
+            background: url("data:image/svg+xml;utf8,\
+               <svg xmlns='http://www.w3.org/2000/svg' version='1.1' width='200' height='400'>\
+                  <defs>\
+                    <pattern id='grid' width='20' height='20' patternUnits='userSpaceOnUse'>\
+                      <rect fill='black' x='0' y='0' width='10' height='10' opacity='0.1'/>\
+                      <rect fill='black' x='10' y='10' width='10' height='10' opacity='0.1'/>\
+                    </pattern>\
+                  </defs>\
+                  <rect fill='url(%23grid)' x='0' y='0' width='100%' height='100%'/>\
+                </svg>\
+            ") top left repeat;
+            margin-top: 10px;
+        }
+
+        .ide-preview {
+            display: inline-block;
+            background: url(images/sample-light.png) top left no-repeat;
+            background-size: 760px 111px;
+            width: 760px;
+            height: 111px;
+            position: relative;
+        }
+
+        fieldset {
+            text-align: left;
+            width: 350px;
+            height: 200px;
+            display: inline-block;
+            vertical-align: top;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+        }
+
+        p {
+            margin: 0 0 10px 0;
+        }
+
+        label {
+            display: inline-block;
+            width: 65px;
+        }
+
+        input[type='color'] {
+            border: none;
+            width: 24px;
+            height: 24px;
+        }
+
+        #updateButton, #downloadButton {
+            display: inline-block;
+            width: 130px;
+            height: 30px;
+            line-height: 30px;
+            padding: 0;
+            margin: 0 0 10px 0;
+
+            border: transparent;
+            border-radius: 5px;
+
+            font-family: system-ui;
+            font-size: 1.1em;
+            text-decoration: none;
+            text-shadow: 0 1px 1px rgba(0, 0, 0, 0.2);
+            color: rgba(0,0,0,.8);
+        }
+
+        #updateButton {
+            background: #E6E6E6 url("data:image/svg+xml;utf8,\
+                <svg version='1.1' xmlns='http://www.w3.org/2000/svg' x='0px' y='0px' width='15px' height='15px'\
+                     viewBox='0 0 317.878 317.878' style='enable-background:new 0 0 317.878 317.878;' xml:space='preserve'>\
+                <path d='M315.607,70.237c-2.653-3.086-7.189-3.881-11.729-1.928l-38.042,16.369C240.674,43.314,195.163,15.63,143.309,15.63\
+                    C64.288,15.63,0,79.918,0,158.939s64.288,143.309,143.309,143.309c11.046,0,20-8.954,20-20s-8.954-20-20-20\
+                    C86.344,262.247,40,215.903,40,158.939S86.344,55.63,143.309,55.63c35.379,0,66.657,17.88,85.284,45.074l-36.271,15.607\
+                    c-3.885,1.672-6.314,4.629-6.666,8.113c-0.351,3.483,1.44,6.866,4.913,9.279l93.503,64.979c2.129,1.479,4.448,2.262,6.706,2.262\
+                    c0.001,0,0.001,0,0.001,0c5.028,0,8.98-3.77,9.832-9.379l17.103-112.572C318.239,75.538,317.491,72.429,315.607,70.237z'/>\
+                </svg>\
+            ") 10px center no-repeat;
+        }
+
+        #downloadButton {
+            background: rgb(28, 184, 65) url("data:image/svg+xml;utf8,\
+                <svg version='1.1' xmlns='http://www.w3.org/2000/svg' x='0px' y='0px' width='15px' height='15px'\
+                     viewBox='0 0 480 480' style='enable-background:new 0 0 480 480;' xml:space='preserve' fill='white'>\
+                    <path d='M378.528,214.688l-21.088-24c-5.824-6.624-15.904-7.264-22.56-1.472L272,244.32V16c0-8.832-7.168-16-16-16h-32\
+                        c-8.832,0-16,7.168-16,16v228.32l-62.88-55.104c-6.624-5.792-16.704-5.152-22.56,1.472l-21.088,23.968\
+                        c-5.856,6.656-5.184,16.8,1.472,22.624l126.528,110.752c6.048,5.28,15.04,5.28,21.088,0L377.056,237.28\
+                        C383.712,231.456,384.384,221.312,378.528,214.688z'/>\
+                    <path d='M416,416H64c-8.832,0-16,7.168-16,16v32c0,8.832,7.168,16,16,16h352c8.832,0,16-7.168,16-16v-32\
+                        C432,423.168,424.832,416,416,416z'/>\
+                </svg>\
+            ") 10px center no-repeat;
+            color: white;
+        }
+
+        .colorText {
+            width: 5em;
+        }
+        .opacity {
+            width: 3em;
+        }
+    </style>
+</head>
+
+<body>
+<div class="container">
+    <h1>IntelliJ Icon Generator</h1>
+<form name="iconAttributes">
+    <fieldset>
+        <legend>Shape</legend>
+
+        <p>
+            <label for="shape">Shape</label>
+            <select id="shape" name="shape">
+                <option value="circle">Circle</option>
+                <option value="square" disabled="disabled">Square</option>
+            </select>
+        </p>
+
+        <p>
+            <label for="radius">Radius</label>
+            <input type="number" id="radius" name="radius" min="1" max="8" value="7">px,
+            <input type="color" name="backgroundColor" value="#40B6E0" onchange="updateValue(this, 'backgroundColorText')">
+            <input class="colorText" name="backgroundColorText" value="#40B6E0" onchange="updateValue(this, 'backgroundColor')">,
+            opacity <input type="number" name="opacity" min="0" max="100" value="60" class="opacity">%
+        </p>
+
+        <p>
+            <label for="strokeWidth">Stroke</label>
+            <input type="number" id="strokeWidth" name="strokeWidth" min="0" max="8" value="0">px,
+            <input type="color" name="strokeColor" value="#40B6E0" onchange="updateValue(this, 'strokeColorText')">
+            <input class="colorText" name="strokeColorText" value="#40B6E0" onchange="updateValue(this, 'strokeColor')">,
+            opacity <input type="number" name="strokeOpacity" min="0" max="100" value="100" class="opacity">%
+        </p>
+    </fieldset>
+
+    <fieldset>
+        <legend>Text</legend>
+
+        <p>
+            <label for="text">Text</label>
+            <input id="text" name="text" value="c">
+        </p>
+
+        <p>
+            <label for="textColor">Color</label>
+            <input type="color" id="textColor" name="textColor" value="#231F20" onchange="updateValue(this, 'textColorText')">
+            <input class="colorText" name="textColorText" value="#231F20" onchange="updateValue(this, 'textColor')">,
+            opacity <input type="number" name="textOpacity" min="0" max="100" value="70">%
+        </p>
+
+        <p>
+            <label for="textXOffset">X offset</label>
+            <input type="range" min="-50" max="50" value="0" id="textXOffset" name="textXOffset"
+                   onchange="updateLabel(this, 'textXOffsetLabel')">
+            <span id="textXOffsetLabel">0</span>
+        </p>
+
+        <p>
+            <label for="textYOffset">Y offset</label>
+            <input type="range" min="-50" max="50" value="-5" id="textYOffset" name="textYOffset"
+                   onchange="updateLabel(this, 'textYOffsetLabel')">
+            <span id="textYOffsetLabel">-5</span>
+        </p>
+
+        <p>
+            <label for="textScale">Scale</label>
+            <input type="range" min="0" max="200" value="80" id="textScale" name="textScale"
+                   onchange="updateLabel(this, 'textScaleLabel')">
+            <span id="textScaleLabel">80</span>%
+        </p>
+    </fieldset>
+
+    <div style="width: 150px; position: relative; display: inline-block;">
+        <svg width="128" height="128" viewBox="0 0 2048 2048" id="preview" class="lightPreview"></svg>
+
+        <button id="updateButton">Refresh</button><br/>
+        <a href="#" id="downloadButton" download="icon.svg">Download</a>
+    </div>
+</form>
+
+<h2>Icon preview (Light theme, 16x16):</h2>
+<div class="ide-preview">
+    <svg width="14" height="14" viewBox="0 0 2048 2048" class="lightPreview" style="position: absolute; top: 61px; left: 30px"></svg>
+    <svg width="14" height="14" viewBox="0 0 2048 2048" class="lightPreview" style="position: absolute; top: 61px; left: 162px"></svg>
+    <svg width="14" height="14" viewBox="0 0 2048 2048" class="lightPreview" style="position: absolute; top: 37px; left: 655px"></svg>
+</div>
+
+<h2>Icon preview (Darcula theme, 16x16):</h2>
+<div class="ide-preview" style="background-image: url(images/sample-darcula.png)">
+    <svg width="14" height="14" viewBox="0 0 2048 2048" class="lightPreview" style="position: absolute; top: 61px; left: 30px"></svg>
+    <svg width="14" height="14" viewBox="0 0 2048 2048" class="lightPreview" style="position: absolute; top: 61px; left: 162px"></svg>
+    <svg width="14" height="14" viewBox="0 0 2048 2048" class="lightPreview" style="position: absolute; top: 37px; left: 655px"></svg>
+</div>
+</div>
+
+</body>
+<script type="text/javascript">
+    if (!String.prototype.encodeHTML) {
+      String.prototype.encodeHTML = function () {
+        return this.replace(/&/g, '&amp;')
+                   .replace(/</g, '&lt;')
+                   .replace(/>/g, '&gt;')
+                   .replace(/"/g, '&quot;')
+                   .replace(/'/g, '&apos;');
+      };
+    }
+
+    var form = document.forms['iconAttributes'];
+
+    if (window.XMLHttpRequest) {
+        xmlhttp = new XMLHttpRequest();
+    } else {
+        xmlhttp = new ActiveXObject("Microsoft.XMLHTTP");
+    }
+    xmlhttp.open("GET", "fonts/Menlo-Regular.svg", false);
+    xmlhttp.send();
+
+    var svgFontSource = xmlhttp.responseXML;
+
+    document.getElementById('updateButton').addEventListener("click", function (evt) {
+        evt.preventDefault();
+
+        updateIcons();
+    });
+
+    [].forEach.call(form.elements, function(element) {
+        element.addEventListener('change', updateIcons);
+    });
+
+    function updateIcons() {
+
+        if (form.elements['shape'].value === 'circle') {
+            var inputText = form.elements['text'].value;
+            var xpath = "//*[name()='glyph'][@unicode='" + inputText + "']/@d";
+            var svgPath = svgFontSource.evaluate(xpath, svgFontSource.documentElement, null, XPathResult.STRING_TYPE, null).stringValue;
+
+            var circle = document.createElementNS('http://www.w3.org/2000/svg', 'circle');
+            circle.setAttribute('fill-opacity', form.elements['opacity'].value / 100);
+            circle.setAttribute('r', form.elements['radius'].value * 2048 / 16);
+            circle.setAttribute('cx', 1024);
+            circle.setAttribute('cy', 1024);
+            circle.setAttribute('fill', form.elements['backgroundColor'].value);
+
+            var strokeWidth = form.elements['strokeWidth'].value;
+            var strokeAttrs = ' ';
+            if (strokeWidth > 0) {
+                circle.style.stroke = form.elements['strokeColor'].value;
+                circle.style.strokeWidth = strokeWidth * 2048/16 + "px";
+                circle.style.strokeOpacity = form.elements['strokeOpacity'].value / 100;
+            }
+
+            var text = document.createElementNS('http://www.w3.org/2000/svg', 'path');
+            text.setAttribute('fill-opacity', form.elements['textOpacity'].value / 100);
+
+            var translateX = 492 + form.elements['textXOffset'].value * 2048 / 100;
+            var translateY = 1556 + form.elements['textYOffset'].value * 2048 / 100;
+            var scale = form.elements['textScale'].value / 100;
+            text.setAttribute('transform', 'translate(' + translateX + ', ' + translateY + ') scale(' + scale + ', -' + scale + ')');
+            text.setAttribute('fill', form.elements['textColor'].value);
+            text.setAttribute('d', svgPath);
+
+            [].forEach.call(document.getElementsByClassName('lightPreview'), function(el) {
+                el.innerHTML = '';
+                el.appendChild(document.createTextNode('\t'));
+                el.appendChild(circle.cloneNode());
+                el.appendChild(document.createTextNode('\n\t'));
+                el.appendChild(text.cloneNode());
+            });
+
+            var svgDownloadContent = '<svg xmlns="http://www.w3.org/2000/svg" width="16px" height="16px" viewBox="0 0 2048 2048">\n'
+                + document.getElementById('preview').innerHTML
+                + '\n</svg>';
+
+            document.getElementById('downloadButton').href = 'data:image/svg+xml;charset=utf-8;base64,' + btoa(svgDownloadContent);
+        }
+    }
+
+    function updateValue(source, targetId) {
+        form.elements[targetId].value = source.value;
+    }
+
+    function updateLabel(source, targetId) {
+        document.getElementById(targetId).innerHTML = source.value;
+    }
+
+    updateIcons();
+</script>
+
+</html>
