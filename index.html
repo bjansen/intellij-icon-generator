@@ -63,6 +63,8 @@
             border: none;
             width: 24px;
             height: 24px;
+            padding: 0;
+            vertical-align: bottom;
         }
 
         #updateButton, #downloadButton {
@@ -113,6 +115,9 @@
 
         .colorText {
             width: 5em;
+            height: 22px;
+            padding: 0;
+            border: 1px solid #dbdbdb;
         }
         .opacity {
             width: 3em;
@@ -145,16 +150,22 @@
 
         <p>
             <label for="radius">Radius</label>
-            <input type="number" id="radius" name="radius" min="1" max="8" value="7">px,
-            <input type="color" name="backgroundColor" value="#40B6E0" onchange="updateValue(this, 'backgroundColorText')">
+            <input type="number" id="radius" name="radius" min="1" max="8" value="7">px
+        </p>
+        <p>
+            <label for="shapeColor">Bg color</label>
+            <input id="shapeColor" type="color" name="backgroundColor" value="#40B6E0" onchange="updateValue(this, 'backgroundColorText')">
             <input class="colorText" name="backgroundColorText" value="#40B6E0" onchange="updateValue(this, 'backgroundColor')">,
             opacity <input type="number" name="opacity" min="0" max="100" value="60" class="opacity">%
         </p>
 
         <p>
             <label for="strokeWidth">Stroke</label>
-            <input type="number" id="strokeWidth" name="strokeWidth" min="0" max="8" value="0">px,
-            <input type="color" name="strokeColor" value="#40B6E0" onchange="updateValue(this, 'strokeColorText')">
+            <input type="number" id="strokeWidth" name="strokeWidth" min="0" max="8" value="0">px
+        </p>
+        <p>
+            <label for="strokeColor">Color</label>
+            <input id="strokeColor" type="color" name="strokeColor" value="#40B6E0" onchange="updateValue(this, 'strokeColorText')">
             <input class="colorText" name="strokeColorText" value="#40B6E0" onchange="updateValue(this, 'strokeColor')">,
             opacity <input type="number" name="strokeOpacity" min="0" max="100" value="100" class="opacity">%
         </p>
@@ -183,7 +194,7 @@
             <label for="textColor">Color</label>
             <input type="color" id="textColor" name="textColor" value="#231F20" onchange="updateValue(this, 'textColorText')">
             <input class="colorText" name="textColorText" value="#231F20" onchange="updateValue(this, 'textColor')">,
-            opacity <input type="number" name="textOpacity" min="0" max="100" value="70">%
+            opacity <input type="number" name="textOpacity" min="0" max="100" value="70" class="opacity">%
         </p>
 
         <p>
