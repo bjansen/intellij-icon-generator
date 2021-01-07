@@ -144,7 +144,7 @@
             <label for="shape">Shape</label>
             <select id="shape" name="shape">
                 <option value="circle">Circle</option>
-                <option value="square" disabled="disabled">Square</option>
+                <option value="square">Square</option>
             </select>
         </p>
 
@@ -285,37 +285,61 @@
     function updateIcons() {
         let unitsPerEm = parseInt(svgFontSource.evaluate("//*[name()='font']//*[name()='font-face']/@units-per-em", svgFontSource.documentElement, null, XPathResult.STRING_TYPE, null).stringValue);
 
-        document.getElementById("preview").setAttribute("viewBox", "0 0 " + unitsPerEm + " " + unitsPerEm);
+        let viewBow = "0 0 " + unitsPerEm + " " + unitsPerEm;
+        document.getElementById("preview").setAttribute("viewBox", viewBow);
 
+        [].forEach.call(document.getElementsByClassName('lightPreview'), function(el) {
+            el.innerHTML = '';
+            el.appendChild(document.createTextNode('\t'));
+            el.appendChild(renderShape(unitsPerEm).cloneNode());
+            el.appendChild(document.createTextNode('\n\t'));
+            el.appendChild(renderText(form.elements['text'].value).cloneNode(true));
+        });
+
+        let svgDownloadContent = '<svg xmlns="http://www.w3.org/2000/svg" width="16px" height="16px" viewBox="' + viewBow + '">\n'
+            + document.getElementById('preview').innerHTML
+            + '\n</svg>';
+
+        document.getElementById('downloadButton').href = 'data:image/svg+xml;charset=utf-8;base64,' + btoa(svgDownloadContent);
+    }
+
+    function renderShape(unitsPerEm) {
         if (form.elements['shape'].value === 'circle') {
-            var circle = document.createElementNS('http://www.w3.org/2000/svg', 'circle');
+            let circle = document.createElementNS('http://www.w3.org/2000/svg', 'circle');
             circle.setAttribute('fill-opacity', form.elements['opacity'].value / 100);
             circle.setAttribute('r', form.elements['radius'].value * unitsPerEm / 16);
             circle.setAttribute('cx', unitsPerEm / 2);
             circle.setAttribute('cy', unitsPerEm / 2);
             circle.setAttribute('fill', form.elements['backgroundColor'].value);
 
-            var strokeWidth = form.elements['strokeWidth'].value;
-            var strokeAttrs = ' ';
+            let strokeWidth = form.elements['strokeWidth'].value;
             if (strokeWidth > 0) {
                 circle.style.stroke = form.elements['strokeColor'].value;
                 circle.style.strokeWidth = strokeWidth * unitsPerEm/16 + "px";
                 circle.style.strokeOpacity = form.elements['strokeOpacity'].value / 100;
             }
 
-            [].forEach.call(document.getElementsByClassName('lightPreview'), function(el) {
-                el.innerHTML = '';
-                el.appendChild(document.createTextNode('\t'));
-                el.appendChild(circle.cloneNode());
-                el.appendChild(document.createTextNode('\n\t'));
-                el.appendChild(renderText(form.elements['text'].value).cloneNode(true));
-            });
+            return circle;
+        } else {
+            let scale = form.elements['textScale'].value / 100;
+            let square = document.createElementNS('http://www.w3.org/2000/svg', 'rect');
+            square.setAttribute('fill-opacity', form.elements['opacity'].value / 100);
+            square.setAttribute('x', unitsPerEm * (1 - scale) / 2);
+            square.setAttribute('y', unitsPerEm * (1 - scale) / 2);
+            square.setAttribute('width', unitsPerEm * scale);
+            square.setAttribute('height', unitsPerEm * scale);
+            square.setAttribute('rx', form.elements['radius'].value * unitsPerEm / 16);
+            square.setAttribute('ry', form.elements['radius'].value * unitsPerEm / 16);
+            square.setAttribute('fill', form.elements['backgroundColor'].value);
 
-            var svgDownloadContent = '<svg xmlns="http://www.w3.org/2000/svg" width="16px" height="16px" viewBox="0 0 2048 2048">\n'
-                + document.getElementById('preview').innerHTML
-                + '\n</svg>';
+            let strokeWidth = form.elements['strokeWidth'].value;
+            if (strokeWidth > 0) {
+                square.style.stroke = form.elements['strokeColor'].value;
+                square.style.strokeWidth = strokeWidth * unitsPerEm/16 + "px";
+                square.style.strokeOpacity = form.elements['strokeOpacity'].value / 100;
+            }
 
-            document.getElementById('downloadButton').href = 'data:image/svg+xml;charset=utf-8;base64,' + btoa(svgDownloadContent);
+            return square;
         }
     }
 
