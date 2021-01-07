@@ -177,16 +177,16 @@
 
         <p>
             <label for="textYOffset">Y offset</label>
-            <input type="range" min="-50" max="50" value="-5" id="textYOffset" name="textYOffset"
+            <input type="range" min="-50" max="50" value="0" id="textYOffset" name="textYOffset"
                    onchange="updateLabel(this, 'textYOffsetLabel')">
-            <span id="textYOffsetLabel">-5</span>
+            <span id="textYOffsetLabel">0</span>
         </p>
 
         <p>
             <label for="textScale">Scale</label>
-            <input type="range" min="0" max="200" value="80" id="textScale" name="textScale"
+            <input type="range" min="0" max="200" value="100" id="textScale" name="textScale"
                    onchange="updateLabel(this, 'textScaleLabel')">
-            <span id="textScaleLabel">80</span>%
+            <span id="textScaleLabel">100</span>%
         </p>
     </fieldset>
 
@@ -248,43 +248,30 @@
     });
 
     function updateIcons() {
+        let unitsPerEm = parseInt(svgFontSource.evaluate("//*[name()='font']//*[name()='font-face']/@units-per-em", svgFontSource.documentElement, null, XPathResult.STRING_TYPE, null).stringValue);
 
         if (form.elements['shape'].value === 'circle') {
-            var inputText = form.elements['text'].value;
-            var xpath = "//*[name()='glyph'][@unicode='" + inputText + "']/@d";
-            var svgPath = svgFontSource.evaluate(xpath, svgFontSource.documentElement, null, XPathResult.STRING_TYPE, null).stringValue;
-
             var circle = document.createElementNS('http://www.w3.org/2000/svg', 'circle');
             circle.setAttribute('fill-opacity', form.elements['opacity'].value / 100);
-            circle.setAttribute('r', form.elements['radius'].value * 2048 / 16);
-            circle.setAttribute('cx', 1024);
-            circle.setAttribute('cy', 1024);
+            circle.setAttribute('r', form.elements['radius'].value * unitsPerEm / 16);
+            circle.setAttribute('cx', unitsPerEm / 2);
+            circle.setAttribute('cy', unitsPerEm / 2);
             circle.setAttribute('fill', form.elements['backgroundColor'].value);
 
             var strokeWidth = form.elements['strokeWidth'].value;
             var strokeAttrs = ' ';
             if (strokeWidth > 0) {
                 circle.style.stroke = form.elements['strokeColor'].value;
-                circle.style.strokeWidth = strokeWidth * 2048/16 + "px";
+                circle.style.strokeWidth = strokeWidth * unitsPerEm/16 + "px";
                 circle.style.strokeOpacity = form.elements['strokeOpacity'].value / 100;
             }
-
-            var text = document.createElementNS('http://www.w3.org/2000/svg', 'path');
-            text.setAttribute('fill-opacity', form.elements['textOpacity'].value / 100);
-
-            var translateX = 492 + form.elements['textXOffset'].value * 2048 / 100;
-            var translateY = 1556 + form.elements['textYOffset'].value * 2048 / 100;
-            var scale = form.elements['textScale'].value / 100;
-            text.setAttribute('transform', 'translate(' + translateX + ', ' + translateY + ') scale(' + scale + ', -' + scale + ')');
-            text.setAttribute('fill', form.elements['textColor'].value);
-            text.setAttribute('d', svgPath);
 
             [].forEach.call(document.getElementsByClassName('lightPreview'), function(el) {
                 el.innerHTML = '';
                 el.appendChild(document.createTextNode('\t'));
                 el.appendChild(circle.cloneNode());
                 el.appendChild(document.createTextNode('\n\t'));
-                el.appendChild(text.cloneNode());
+                el.appendChild(renderText(form.elements['text'].value).cloneNode(true));
             });
 
             var svgDownloadContent = '<svg xmlns="http://www.w3.org/2000/svg" width="16px" height="16px" viewBox="0 0 2048 2048">\n'
@@ -293,6 +280,43 @@
 
             document.getElementById('downloadButton').href = 'data:image/svg+xml;charset=utf-8;base64,' + btoa(svgDownloadContent);
         }
+    }
+
+    function renderText(inputText) {
+        let horizAdvX = parseInt(svgFontSource.evaluate("//*[name()='font']/@horiz-adv-x", svgFontSource.documentElement, null, XPathResult.STRING_TYPE, null).stringValue);
+        let ascent = parseInt(svgFontSource.evaluate("//*[name()='font']//*[name()='font-face']/@ascent", svgFontSource.documentElement, null, XPathResult.STRING_TYPE, null).stringValue);
+        let unitsPerEm = parseInt(svgFontSource.evaluate("//*[name()='font']//*[name()='font-face']/@units-per-em", svgFontSource.documentElement, null, XPathResult.STRING_TYPE, null).stringValue);
+        let scale = form.elements['textScale'].value / 100;
+        let offsetX = form.elements['textXOffset'].value;
+        let offsetY = form.elements['textYOffset'].value;
+
+        let g = document.createElementNS('http://www.w3.org/2000/svg', 'g');
+
+        // try centering the best we can, the result will depend on the glyphs being rendered
+        let translateX = -((inputText.length - 1) * (unitsPerEm - horizAdvX) / 2) / 2;
+        translateX += offsetX * unitsPerEm / 100;
+
+        let translateY = ascent + offsetY * unitsPerEm / 100;
+
+        g.setAttribute('transform', 'scale(' + scale + ')');
+
+        for (let i = 0; i < inputText.length; i++) {
+            let char = inputText.charAt(i);
+
+            let xpath = "//*[name()='glyph'][@unicode='" + char + "']/@d";
+            let svgPath = svgFontSource.evaluate(xpath, svgFontSource.documentElement, null, XPathResult.STRING_TYPE, null).stringValue;
+
+            let text = document.createElementNS('http://www.w3.org/2000/svg', 'path');
+            text.setAttribute('fill-opacity', form.elements['textOpacity'].value / 100);
+            text.setAttribute('transform', 'translate(' + translateX + ', ' + translateY + ') rotate(180) scale(-1, 1)');
+            text.setAttribute('fill', form.elements['textColor'].value);
+            text.setAttribute('d', svgPath);
+            g.appendChild(text);
+
+            translateX += horizAdvX;
+        }
+
+        return g;
     }
 
     function updateValue(source, targetId) {
