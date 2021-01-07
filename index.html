@@ -44,7 +44,6 @@
         fieldset {
             text-align: left;
             width: 350px;
-            height: 200px;
             display: inline-block;
             vertical-align: top;
             border: 1px solid #ccc;
@@ -118,6 +117,14 @@
         .opacity {
             width: 3em;
         }
+
+        form {
+            display: flex;
+        }
+        fieldset {
+            flex: 1;
+        }
+
     </style>
 </head>
 
@@ -155,6 +162,17 @@
 
     <fieldset>
         <legend>Text</legend>
+
+        <p>
+            <label for="font">Font</label>
+            <select id="font" name="font" onchange="svgFontSource = loadSvgFont()">
+                <option value="Menlo-Regular.svg" selected>Menlo</option>
+                <option value="Menlo-Bold.svg">Menlo bold</option>
+                <option value="Menlo-Italic.svg">Menlo italic</option>
+                <option value="Menlo-BoldItalic.svg">Menlo bold+italic</option>
+                <option value="GothamPro.svg">Gotham Pro</option>
+            </select>
+        </p>
 
         <p>
             <label for="text">Text</label>
@@ -227,15 +245,21 @@
 
     var form = document.forms['iconAttributes'];
 
-    if (window.XMLHttpRequest) {
-        xmlhttp = new XMLHttpRequest();
-    } else {
-        xmlhttp = new ActiveXObject("Microsoft.XMLHTTP");
-    }
-    xmlhttp.open("GET", "fonts/Menlo-Regular.svg", false);
-    xmlhttp.send();
+    function loadSvgFont() {
+        let fontPath = document.getElementById("font").value;
 
-    var svgFontSource = xmlhttp.responseXML;
+        if (window.XMLHttpRequest) {
+            xmlhttp = new XMLHttpRequest();
+        } else {
+            xmlhttp = new ActiveXObject("Microsoft.XMLHTTP");
+        }
+        xmlhttp.open("GET", "fonts/" + fontPath, false);
+        xmlhttp.send();
+
+        return xmlhttp.responseXML;
+    }
+
+    let svgFontSource = loadSvgFont();
 
     document.getElementById('updateButton').addEventListener("click", function (evt) {
         evt.preventDefault();
@@ -249,6 +273,8 @@
 
     function updateIcons() {
         let unitsPerEm = parseInt(svgFontSource.evaluate("//*[name()='font']//*[name()='font-face']/@units-per-em", svgFontSource.documentElement, null, XPathResult.STRING_TYPE, null).stringValue);
+
+        document.getElementById("preview").setAttribute("viewBox", "0 0 " + unitsPerEm + " " + unitsPerEm);
 
         if (form.elements['shape'].value === 'circle') {
             var circle = document.createElementNS('http://www.w3.org/2000/svg', 'circle');
