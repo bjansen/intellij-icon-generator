@@ -142,7 +142,7 @@
 
         <p>
             <label for="shape">Shape</label>
-            <select id="shape" name="shape">
+            <select id="shape" name="shape" onchange="onShapeChanged(this)">
                 <option value="circle">Circle</option>
                 <option value="square">Square</option>
             </select>
@@ -151,6 +151,10 @@
         <p>
             <label for="radius">Radius</label>
             <input type="number" id="radius" name="radius" min="1" max="8" value="7">px
+        </p>
+        <p id="squareSizeSection">
+            <label for="squareSize">Size</label>
+            <input type="number" id="squareSize" name="squareSize" min="1" max="16" value="16">px
         </p>
         <p>
             <label for="shapeColor">Bg color</label>
@@ -323,12 +327,13 @@
             return circle;
         } else {
             let scale = form.elements['textScale'].value / 100;
+            let squareSize = form.elements['squareSize'].value;
             let square = document.createElementNS('http://www.w3.org/2000/svg', 'rect');
             square.setAttribute('fill-opacity', form.elements['opacity'].value / 100);
-            square.setAttribute('x', unitsPerEm * (1 - scale) / 2);
-            square.setAttribute('y', unitsPerEm * (1 - scale) / 2);
-            square.setAttribute('width', unitsPerEm * scale);
-            square.setAttribute('height', unitsPerEm * scale);
+            square.setAttribute('x', (unitsPerEm - unitsPerEm / 16 * squareSize) / 2);
+            square.setAttribute('y', (unitsPerEm - unitsPerEm / 16 * squareSize) / 2);
+            square.setAttribute('width', unitsPerEm / 16 * squareSize);
+            square.setAttribute('height', unitsPerEm / 16 * squareSize);
             square.setAttribute('rx', form.elements['radius'].value * unitsPerEm / 16);
             square.setAttribute('ry', form.elements['radius'].value * unitsPerEm / 16);
             square.setAttribute('fill', form.elements['backgroundColor'].value);
@@ -389,6 +394,10 @@
         document.getElementById(targetId).innerHTML = source.value;
     }
 
+    function onShapeChanged(source) {
+        let display = source.value === 'square' ? 'inherit' : 'none';
+        document.getElementById('squareSizeSection').style.display = display;
+    }
     updateIcons();
 </script>
 
